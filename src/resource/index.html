@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>群聊</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.0/jquery.slim.min.js"></script>
+</head>
+<body>
+<div>
+    <label>请输入用户名：</label>
+    <input type="text" id="name" placeholder="用户名">
+</div>
+<div>
+    <button type="button" id="connect">连接</button>
+    <button type="button" id="disconnect">断开连接</button>
+</div>
+<div id="chat">
+</div>
+<div>
+    <input type="text" id="content" placeholder="内容" style="display: inline-block;">
+    <button type="button" id="send" style="display: inline-block;">发送</button>
+</div>
+<ul id="info" style="list-style: none">
+</ul>
+<script>
+    function connect() {
+        var ws = new WebSocket("ws://localhost:2020");
+        ws.onopen = function(){
+            $('#chat').text('连接成功');
+        };
+
+        ws.onmessage = function (evt){
+            try{
+                update(JSON.parse(evt.data));
+            }catch(err){
+            }
+        };
+
+        ws.onclose = function(){
+            $('#chat').text('');
+        };
+
+
+        $('#send').click(function () {
+            ws.send(JSON.stringify({'name': $('#name').val(), 'content': $('#content').val()}));
+        });
+
+        $('#disconnect').click(function () {
+            ws.close();
+        });
+    }
+
+    function update(message) {
+        $('#info').append('<li><b>' + message.name + ' : </b>' + message.content + '</li>')
+    }
+
+    $(function () {
+        $('#connect').click(function () {
+            connect();
+        });
+    })
+</script>
+</body>
+</html>
